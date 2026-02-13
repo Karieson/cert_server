@@ -4,6 +4,12 @@ import path from "path";
 import fs from "fs";
 import cors from "cors";
 
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 const app = express();
 const PORT = process.env.PORT || 3000; // Render will set this automatically
 const SECRET = "VERY_SECRET_KEY"; // Change in production!
@@ -46,3 +52,4 @@ app.get("/cert", verifyToken, (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
