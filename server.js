@@ -1,41 +1,43 @@
+// server.js
 import express from "express";
 import jwt from "jsonwebtoken";
 import path from "path";
 import fs from "fs";
 import cors from "cors";
-import fetch from "node-fetch"; // For server-side reCAPTCHA verification
+import fetch from "node-fetch"; 
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 import dotenv from "dotenv";
 
-dotenv.config(); // Load .env variables
+dotenv.config(); // load .env variables
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const SECRET = "VERY_SECRET_KEY"; // Change in production!
-const RECAPTCHA_SECRET_KEY = process.env.RECAPTCHA_SECRET_KEY;
+const SECRET = process.env.SECRET_KEY || "VERY_SECRET_KEY"; // JWT secret
+const RECAPTCHA_SECRET_KEY = process.env.RECAPTCHA_SECRET_KEY; // loaded from Render env
 
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true })); // For form POST
-app.use(express.static(path.join(__dirname, "public"))); // Serve front-end files
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, "public"))); 
 
 // ==========================
-// 🔐 Landing page with reCAPTCHA verification
+// Landing Page
 // ==========================
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "landing.html"));
 });
 
-// Handle reCAPTCHA form submission
+// ==========================
+// Optional: reCAPTCHA verification for server-side forms
+// ==========================
 app.post("/verify", async (req, res) => {
   const token = req.body["g-recaptcha-response"];
-
-  if (!token) return res.send("CAPTCHA token missing. Please try again.");
+  if (!token) return res.status(400).send("CAPTCHA token missing");
 
   try {
     const response = await fetch(
@@ -45,19 +47,18 @@ app.post("/verify", async (req, res) => {
     const data = await response.json();
 
     if (data.success) {
-      // reCAPTCHA passed → redirect to token route or main page
-      res.redirect("/token"); // or /main if you have another page
+      res.send("CAPTCHA passed");
     } else {
-      res.send("CAPTCHA failed. Please try again.");
+      res.status(403).send("CAPTCHA failed");
     }
   } catch (err) {
     console.error(err);
-    res.send("Error verifying CAPTCHA");
+    res.status(500).send("Error verifying CAPTCHA");
   }
 });
 
 // ==========================
-// 🔐 Issue short-lived token
+// Issue short-lived token for secure PDF
 // ==========================
 app.get("/token", (req, res) => {
   const token = jwt.sign({ access: "cert" }, SECRET, { expiresIn: "2m" });
@@ -65,7 +66,7 @@ app.get("/token", (req, res) => {
 });
 
 // ==========================
-// 🛡️ Middleware to verify token
+// Middleware to verify token
 // ==========================
 function verifyToken(req, res, next) {
   const token = req.query.token;
@@ -78,7 +79,7 @@ function verifyToken(req, res, next) {
 }
 
 // ==========================
-// 📄 Secure PDF endpoint with inline display
+// Secure Certificates PDF
 // ==========================
 app.get("/cert", verifyToken, (req, res) => {
   const filePath = path.join(__dirname, "certs", "my_certs.pdf");
@@ -87,6 +88,18 @@ app.get("/cert", verifyToken, (req, res) => {
 
   res.setHeader("Content-Type", "application/pdf");
   res.setHeader("Content-Disposition", "inline; filename=my_certs.pdf");
+  fs.createReadStream(filePath).pipe(res);
+});
+
+// ==========================
+// Direct Resume Download
+// ==========================
+app.get("/my_resume.pdf", (req, res) => {
+  const filePath = path.join(__dirname, "public", "my_resume.pdf");
+  if (!fs.existsSync(filePath)) return res.status(404).send("Resume not found");
+
+  res.setHeader("Content-Type", "application/pdf");
+  res.setHeader("Content-Disposition", "attachment; filename=my_resume.pdf");
   fs.createReadStream(filePath).pipe(res);
 });
 
