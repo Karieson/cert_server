@@ -1022,10 +1022,6 @@ function toggleCard(id) {
   card.style.display = card.style.display === 'block' ? 'none' : 'block';
 }
 
-function viewCertificates() {
-  alert("Here you can view Aden's certificates. Replace with modal or PDF/images.");
-}
-
 // Hero text bubble effect
 const heroText = document.getElementById("heroIntro");
 const text = heroText.textContent;
@@ -1056,17 +1052,31 @@ async function viewCert() {
   } catch (err) {
     alert("Failed to fetch token");
   }
-<script>
+// CAPTCHA logic
 document.addEventListener('DOMContentLoaded', () => {
   const overlay = document.getElementById('captchaOverlay');
   const captchaImg = document.getElementById('captchaImg');
   const captchaInput = document.getElementById('captchaInput');
   const verifyBtn = document.getElementById('captchaSubmit');
   const errorMsg = document.getElementById('captchaError');
+  const pageContent = document.getElementById('pageContent');
+
+  let captchaSolved = false;
+
+  // Block downloads until solved
+  document.querySelectorAll('.resume-link').forEach(link => {
+    link.addEventListener('click', (e) => {
+      if (!captchaSolved) {
+        e.preventDefault();
+        alert('Please complete CAPTCHA first.');
+      }
+    });
+  });
 
   verifyBtn.addEventListener('click', async () => {
     const value = captchaInput.value.trim();
-    if(!value) return;
+    if (!value) return;
+
     try {
       const res = await fetch('/verify-captcha', {
         method: 'POST',
@@ -1075,26 +1085,20 @@ document.addEventListener('DOMContentLoaded', () => {
         body: JSON.stringify({ captcha: value })
       });
 
-      if(res.ok){
+      if (res.ok) {
+        captchaSolved = true;
         overlay.style.display = 'none';
+        pageContent.style.display = 'block';
       } else {
         errorMsg.innerText = 'Incorrect CAPTCHA. Try again.';
         captchaImg.src = '/captcha-image?' + Date.now();
         captchaInput.value = '';
       }
-    } catch(err){
+    } catch {
       errorMsg.innerText = 'Server error. Try again.';
     }
-  
-}
-
-
+  });
+});
 </script>
-
 </body>
-
-
 </html>
-
-
-
