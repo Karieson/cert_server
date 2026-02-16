@@ -1,25 +1,28 @@
 {
-  "name": "cert_server",
+  "name": "captcha_project",
   "version": "1.0.0",
-  "description": "Secure portfolio server with resume and certificate protection using reCAPTCHA and JWT",
+  "description": "Node.js server with JWT token, PureImage CAPTCHA overlay, and secure PDF access",
   "main": "server.js",
   "type": "module",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js"
+    "start": "node server.js"
   },
-  "keywords": ["portfolio", "reCAPTCHA", "jwt", "express", "certificates"],
+  "keywords": [
+    "captcha",
+    "pureimage",
+    "jwt",
+    "express",
+    "termux"
+  ],
   "author": "Aden Sheikh Abdullahi",
   "license": "MIT",
   "dependencies": {
     "cors": "^2.8.5",
-    "dotenv": "^16.3.1",
-    "express": "^4.18.2",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-session": "^1.17.3",
     "jsonwebtoken": "^9.0.2",
-    "node-fetch": "^3.3.2"
-  },
-  "devDependencies": {
-    "nodemon": "^3.0.1"
+    "node-fetch": "^3.3.2",
+    "pureimage": "^0.4.18"
   }
 }
-
