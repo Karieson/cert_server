@@ -658,7 +658,13 @@ footer{
   
 
 </head>
-  <!-- CAPTCHA Overlay -->
+
+  
+
+<body>
+
+<body>
+<!-- CAPTCHA Overlay -->
 <div id="captchaOverlay" style="
   position: fixed;
   top:0; left:0;
@@ -692,12 +698,23 @@ footer{
   ">Verify</button>
   <p id="captchaError" style="color:red; margin-top:10px;"></p>
 </div>
-
   
 
-<body>
+<!-- Page content hidden initially -->
+<div id="pageContent" style="display:none;">
+  <!-- NAVBAR -->
+  <div class="navbar"> ... </div>
+  
+  <!-- HERO -->
+  <section class="hero"> ... </section>
 
-
+  <!-- PROFILE, CTA, Landing, Footer, etc. -->
+  <div class="profile-btn-container"> ... </div>
+  <div class="profile-text" id="profileText"> ... </div>
+  <div class="landing-cta"> ... </div>
+  <div class="dropdown" id="landing"> ... </div>
+  <footer> ... </footer>
+</div>
 
 <!-- NAVBAR -->
 
@@ -1078,5 +1095,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 </html>
+
 
 
