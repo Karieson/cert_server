@@ -656,8 +656,44 @@ footer{
 
 </style>
   
-<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
 </head>
+  <!-- CAPTCHA Overlay -->
+<div id="captchaOverlay" style="
+  position: fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  background-color: rgba(0,0,0,0.95);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  z-index:9999;
+">
+  <h2 style="color: #0f0; font-style: italic; margin-bottom: 20px;">Verify you are human</h2>
+  <img id="captchaImg" src="/captcha-image" alt="CAPTCHA" style="margin-bottom:20px;">
+  <input id="captchaInput" type="text" placeholder="Enter CAPTCHA" style="
+    padding: 10px;
+    border: 2px solid #0f0;
+    border-radius: 5px;
+    background-color: #000;
+    color: #0f0;
+    font-size: 16px;
+    margin-bottom: 10px;
+  ">
+  <button id="captchaSubmit" style="
+    padding: 10px 20px;
+    background-color: #0f0;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    color: #000;
+    font-weight: bold;
+  ">Verify</button>
+  <p id="captchaError" style="color:red; margin-top:10px;"></p>
+</div>
+
+  
 
 <body>
 
@@ -1003,7 +1039,38 @@ async function viewCert() {
   } catch (err) {
     alert("Failed to fetch token");
   }
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const overlay = document.getElementById('captchaOverlay');
+  const captchaImg = document.getElementById('captchaImg');
+  const captchaInput = document.getElementById('captchaInput');
+  const verifyBtn = document.getElementById('captchaSubmit');
+  const errorMsg = document.getElementById('captchaError');
+
+  verifyBtn.addEventListener('click', async () => {
+    const value = captchaInput.value.trim();
+    if(!value) return;
+    try {
+      const res = await fetch('/verify-captcha', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ captcha: value })
+      });
+
+      if(res.ok){
+        overlay.style.display = 'none';
+      } else {
+        errorMsg.innerText = 'Incorrect CAPTCHA. Try again.';
+        captchaImg.src = '/captcha-image?' + Date.now();
+        captchaInput.value = '';
+      }
+    } catch(err){
+      errorMsg.innerText = 'Server error. Try again.';
+    }
+  
 }
+
 
 </script>
 
@@ -1011,4 +1078,5 @@ async function viewCert() {
 
 
 </html>
+
 
